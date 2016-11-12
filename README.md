@@ -7,11 +7,11 @@
 open-source zero-knowledge password manager service that runs everywhere and syncs.
 
 # <a name="example"></a> EXAMPLE
-```javascript
+```typescript
 import getService from 'zenypass-service'
 ```
 
-# <a name="api"></a> API
+# <a name="api"></a> API (experimental)
 TBD
 
 # <a name="contributing"></a> CONTRIBUTING
