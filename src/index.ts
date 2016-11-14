@@ -13,7 +13,7 @@
  */
 ;
 // TODO interface for changing master password
-import { ZenypassVaultService } from './vault-service'
+import { ZenypassVaultService, ZenypassCredentials } from './vault-service'
 export interface Observable<T> {} // TODO: replace with import
 
 export interface ZenypassServiceFactory {
@@ -69,11 +69,6 @@ export interface ZenypassServiceFactory {
    */
   signin (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
   Promise<LocalAgentManagementService|ZenypassService>
-}
-
-export interface ZenypassCredentials {
-  username: string
-  passphrase: string
 }
 
 export interface ZenypassServiceOpts {

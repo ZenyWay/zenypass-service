@@ -29,22 +29,23 @@ export interface ZenypassVaultService {
    * a versioned document,
    * or an array of versioned documents.
    *
-   * @param {Observable<D>|PromiseLike<D>|ArrayLike<D>} doc$
-   * a sequence-like set of versioned documents.
+   * @param {Observable<D>} doc$
+   * a sequence of instances or arrays of {ZenypassDoc} versioned documents.
    *
    * @return {Observable<DocRef[]|DocRef>}
    * sequence of resulting {DocRef} references after storage.
-   * when the input `docs` sequence emits an array of documents,
+   * when the input `doc$` sequence emits an array of documents,
    * the output sequence emits a resulting array of {DocRef} references,
    * in the same order.
    *
-   * @error {Error} when storing a document fails
+   * @error {Error} when storing a document fails,
+   * e.g. when the underlying key is locked.
    * // TODO provide more detail on possible storage errors
    *
    * @memberOf ZenypassVaultService
    */
-  write <D extends VersionedDoc[]|VersionedDoc>
-  (doc$: Observable<D>|PromiseLike<D>|ArrayLike<D>): Observable<DocRef[]|DocRef>
+  write <D extends ZenypassDoc[]|ZenypassDoc>
+  (doc$: Observable<D>): Observable<DocRef[]|DocRef>
 
   /**
    * @public
@@ -68,13 +69,14 @@ export interface ZenypassVaultService {
    * a {DocIdRange} range of document references,
    * or a {DocRevs} set of references to document revisions.
    *
-   * @template D extends VersionedDoc|(VersionedDoc&DocRevStatus
+   * @template D extends VersionedDoc|(VersionedDoc&DocRevStatus)
    *
-   * @param {Observable<R>|PromiseLike<R>|ArrayLike<R>} ref$
-   * a sequence-like set of document references.
+   * @param {Observable<R>} ref$
+   * a sequence of document references.
    *
    * @return {Observable<D[]|D>}
-   * the full referenced {VersionedDoc} document(s),
+   * the referenced {VersionedDoc} document(s)
+   * with all of its content excluding the `restricted` entry,
    * or only the corresponding {VersionedDoc} stubbed references,
    * retrieved from the underlying
    * (cryptobox)[https://www.npmjs.com/package/cryptobox] instance.
@@ -88,30 +90,88 @@ export interface ZenypassVaultService {
    * or else as specified by the {DocIdRange} range.
    *
    * @error {Error} when retrieving a document fails
+   * e.g. when the underlying key is locked.
    * // TODO provide more detail on possible fetch errors
    *
    * @memberOf ZenypassVaultService
    */
   read <R extends DocRef[]|DocIdRange|DocRevs|DocRef,
   D extends VersionedDoc|(VersionedDoc&DocRevStatus)>
-  (ref$: Observable<R>|PromiseLike<R>|ArrayLike<R>): Observable<D[]|D>}
+  (ref$: Observable<R>, opts?: ReadOpts): Observable<D[]|D>
 
-export interface DocRevStatus {
-  _revisions?: any, // TODO define _revisions interface
-  _revs_info?: any, // TODO define _revs_info interface
-  _conflicts?: any, // TODO define _conflicts interface
+  /**
+   * @public
+   * @method
+   *
+   * @description
+   * rx operator that maps a sequence of document references
+   * including credentials
+   * to the `restricted` entry of the corresponding documents fetched from
+   * the underlying (cryptobox)[https://www.npmjs.com/package/cryptobox] instance.
+   * each document fetched requires valid credentials.
+   *
+   * @template R extends DocRef|(DocRef&ZenypassCredentials)
+   * a single reference, specified as a {DocRef}
+   * including valid {ZenypassCredentials},
+   * unless the `strict` entry of the fetched {ZenypassDoc}
+   * is explicitely set to `false`.
+   *
+   * @template D extends VersionedDoc
+   *
+   * @param {Observable<R>} ref$
+   * a sequence-like set of document references.
+   *
+   * @return {Observable<D[]|D>}
+   * the `restricted` entry of the {VersionedDoc} document
+   * retrieved from the underlying
+   * (cryptobox)[https://www.npmjs.com/package/cryptobox] instance.
+   *
+   * @error {Error} when retrieving a document fails
+   * // TODO provide more detail on possible fetch errors
+   *
+   * @memberOf ZenypassVaultService
+   */
+  readRestricted <R extends DocRef|(DocRef&ZenypassCredentials), D extends VersionedDoc>
+  (ref$: Observable<R>): Observable<D[]|D>
+}
+
+export interface ZenypassCredentials {
+  username: string
+  passphrase: string
+}
+
+export interface ZenypassDoc extends VersionedDoc {
+  name: string
+  url: string
+  keywords: string[]
+  /**
+   * restricted entry, not accessible with ZenypassVaultService#read.
+   * only accessible with ZenypassVaultService#readRestricted.
+   *
+   * @type {{username:string,password:string}}
+   * @memberOf ZenypassDoc
+   */
+  restricted?: {
+    username: string
+    password: string
+  }
+  /**
+   * when `false`, ZenypassVaultService#readRestricted
+   * ignores the requirement for a valid {ZenypassCredentials},
+   * i.e. the `restricted` entry can be fetched
+   * without additional credentials input.
+   *
+   * default is `true`:
+   * {ZenypassCredentials} are required for ZenypassVaultService#readRestricted.
+   *
+   * @type {boolean=true}
+   * @memberOf ZenypassDoc
+   */
+  strict?: boolean
 }
 
 export interface VersionedDoc extends DocRef {
-  _attachments?: { [id: string]: Attachment },
   _deleted?: boolean
-}
-
-export interface Attachment {
-  content_type: string,
-  digest?: string,
-  data?: Blob|Buffer|string,
-  stub?: boolean
 }
 
 /**
@@ -142,6 +202,12 @@ export interface DocRevs extends DocId {
    * an empty array represents all document revisions.
    */
   _revs: string[]
+}
+
+export interface DocRevStatus {
+  _revisions?: any, // TODO define _revisions interface
+  _revs_info?: any, // TODO define _revs_info interface
+  _conflicts?: any, // TODO define _conflicts interface
 }
 
 /**
@@ -216,12 +282,4 @@ export interface ReadOpts {
    * @see [PouchDb#allDocs](https://pouchdb.com/api.html#batch_fetch) options
    */
   include_docs?: boolean
-}
-
-/**
- * @public
- * @interface {WriteOpts}
- */
-export interface WriteOpts {
-  // TBD
 }
