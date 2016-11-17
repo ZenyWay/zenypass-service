@@ -14,6 +14,14 @@
 ;
 export interface Observable<T> {} // TODO: replace with import
 
+export interface ZenypassVaultServiceFactory {
+  (config: ZenypassVaultServiceConfig): Promise<ZenypassVaultServiceFactory>
+}
+
+export interface ZenypassVaultServiceConfig {
+  // TODO define ZenypassVaultServiceConfig interface
+}
+
 export interface ZenypassVaultService {
   /**
    * @public

@@ -14,60 +14,62 @@
 ;
 // TODO interface for changing master password
 import { ZenypassVaultService, ZenypassCredentials } from './vault-service'
-export interface Observable<T> {} // TODO: replace with import
+export declare interface Observable<T> {} // TODO: replace with import
 
-export interface ZenypassServiceFactory {
-  /**
-   * @public
-   * @method
-   *
-   * @description
-   * sign-up for a new Zenypass account.
-   *
-   * @param {ZenypassCredentials} creds
-   * the user should always be asked to enter the passphrase twice
-   * for confirmation before calling this method.
-   *
-   * @param {ZenypassServiceOpts} [opts]
-   *
-   * @returns {Promise<ZenypassServiceFactory>}
-   *
-   * @error {Error} 'service unavailable'
-   *
-   * @error {Error} 'conflict'
-   * when an account already exists for the given username
-   *
-   * @memberOf ZenypassServiceFactory
-   */
-  signup (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
+/**
+ * @public
+ * @function
+ *
+ * @description
+ * sign-up for a new Zenypass account.
+ *
+ * @param {ZenypassCredentials} creds
+ * the user should always be asked to enter the passphrase twice
+ * for confirmation before calling this method.
+ *
+ * @param {ZenypassServiceOpts} [opts]
+ *
+ * @returns {Promise<ZenypassServiceFactory>}
+ *
+ * @error {Error} 'service unavailable'
+ *
+ * @error {Error} 'conflict'
+ * when an account already exists for the given username
+ *
+ * @memberOf ZenypassServiceFactory
+ */
+export interface ZenypassServiceFactoryRequest {
+  (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
   Promise<ZenypassServiceFactory>
+}
 
-  /**
-   * @public
-   * @method
-   *
-   * @description
-   * sign-in to an existing Zenypass account.
-   *
-   * @param {ZenypassCredentials} creds
-   *
-   * @param {ZenypassServiceOpts} [opts]
-   *
-   * @returns {Promise<ZenypassAgentAuthService|ZenypassService>}
-   * a Promise that resolves to either:
-   * * a {ZenypassAgentAuthService} instance
-   * when this agent is not yet authorized access to the Zenypass account.
-   * * a {ZenypassService} instance
-   * when this agent is authorized access to the Zenypass account.
-   *
-   * @error {Error} 'service unavailable'
-   *
-   * @error {Error} 'authentication error'
-   * when credentials do not match any existing Zenypass account.
-   *
-   * @memberOf ZenypassServiceFactory
-   */
-  signin (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
+/**
+ * @public
+ * @function
+ *
+ * @description
+ * sign-in to an existing Zenypass account.
+ *
+ * @param {ZenypassCredentials} creds
+ *
+ * @param {ZenypassServiceOpts} [opts]
+ *
+ * @returns {Promise<ZenypassAgentAuthService|ZenypassService>}
+ * a Promise that resolves to either:
+ * * a {ZenypassAgentAuthService} instance
+ * when this agent is not yet authorized access to the Zenypass account.
+ * * a {ZenypassService} instance
+ * when this agent is authorized access to the Zenypass account.
+ *
+ * @error {Error} 'service unavailable'
+ *
+ * @error {Error} 'authentication error'
+ * when credentials do not match any existing Zenypass account.
+ *
+ * @memberOf ZenypassServiceFactory
+ */
+export interface ZenypassServiceFactory {
+  (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
   Promise<LocalAgentManagementService|ZenypassService>
 }
 
@@ -100,6 +102,24 @@ export interface ZenypassServiceOpts {
  *
  */
 export interface ZenypassService {
+  /**
+   * @public
+   * @method
+   *
+   * @description
+   * revoke all agents and delete this Zenypass account.
+   *
+   * the user should be warned that this is irrevocable.
+   *
+   * @param {ZenypassCredentials} creds
+   * necessary security, as it ensures
+   * the account owner is requesting account deletion.
+   *
+   * @returns {Promise<ZenypassServiceFactoryRequest>}
+   *
+   * @memberOf ZenypassService
+   */
+  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassServiceFactoryRequest>
   /**
    * @public
    * @method
@@ -171,7 +191,7 @@ export interface ZenypassService {
  * @interface
  *
  * @description
- * authenticate or cancel and destroy this local agent.
+ * authenticate or delete this local agent.
  * this interface is only available to a local agent
  * without access to its user's account,
  * i.e. before authorization or after revocation
@@ -204,7 +224,7 @@ export interface LocalAgentManagementService extends AgentIdentifier {
    * @method
    *
    * @description
-   * delete this agent.
+   * delete this local agent.
    *
    * since this method is only available to a local agent
    * without access to its user's account,
@@ -218,9 +238,20 @@ export interface LocalAgentManagementService extends AgentIdentifier {
    *
    * @memberOf LocalAgentManagementService
    */
-  destroy (): Promise<ZenypassServiceFactory>
+  delete (): Promise<ZenypassServiceFactory>
 }
 
+/**
+ * @public
+ * @interface
+ *
+ * @description
+ * revoke remote agents.
+ *
+ * this interface is restricted to managing remote agents.
+ *
+ * @extends {AgentIdentifier}
+ */
 export interface RemoteAgentManagementService extends AgentIdentifier {
   /**
    * @public
@@ -230,13 +261,13 @@ export interface RemoteAgentManagementService extends AgentIdentifier {
    * revoke access to this account for this Agent.
    *
    * calling this method enables deleting the corresponding agent
-   * when next [signing-in to it]{@link LocalAgentManagementService#destroy}.
+   * when next [signing-in to it]{@link LocalAgentManagementService#delete}.
    *
    * @param {ZenypassCredentials} creds
    * necessary security, as it ensures
    * the account owner is issuing the revocation request.
    *
-   * @returns {(Promise<(AgentAuthorizationService|AgentRevocationService)[]>)}
+   * @returns {(Promise<(RemoteAgentManagementService)[]>)}
    *
    * @memberOf AgentRevocationService
    */
@@ -261,3 +292,36 @@ export interface AgentIdentifier {
    */
   id: string
 }
+
+class ServiceClass implements ZenypassService {
+  static signup (this: void, creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
+  Promise<ZenypassServiceFactory> {
+    return
+  }
+
+  static signin (this: void, creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
+  Promise<LocalAgentManagementService|ZenypassService> {
+    return
+  }
+
+  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassServiceFactoryRequest> {
+    return
+  }
+
+  signout (): Promise<ZenypassServiceFactory> {
+    return
+  }
+
+  getAuthTokenStream (cred$: Observable<ZenypassCredentials>): Observable<string> {
+    return
+  }
+
+  constructor (
+    public vault: ZenypassVaultService,
+    public agent$: Observable<(RemoteAgentManagementService)[]>,
+    public online$: Observable<boolean>
+  ) {}
+}
+
+export const signup: ZenypassServiceFactoryRequest = ServiceClass.signup
+export const signin: ZenypassServiceFactory = ServiceClass.signin
