@@ -25,7 +25,7 @@ export declare interface Observable<T> {} // TODO: replace with import
  *
  * @param {ZenypassCredentials} creds
  * the user should always be asked to enter the passphrase twice
- * for confirmation before calling this method.
+ * for confirmation before calling this function.
  *
  * @param {ZenypassServiceOpts} [opts]
  *
@@ -38,7 +38,7 @@ export declare interface Observable<T> {} // TODO: replace with import
  *
  * @memberOf ZenypassServiceFactory
  */
-export interface ZenypassServiceFactoryRequest {
+export interface ZenypassAccountRequest {
   (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
   Promise<ZenypassServiceFactory>
 }
@@ -54,9 +54,9 @@ export interface ZenypassServiceFactoryRequest {
  *
  * @param {ZenypassServiceOpts} [opts]
  *
- * @returns {Promise<ZenypassAgentAuthService|ZenypassService>}
+ * @returns {Promise<AuthenticationService|ZenypassService>}
  * a Promise that resolves to either:
- * * a {ZenypassAgentAuthService} instance
+ * * a {AuthenticationService} instance
  * when this agent is not yet authorized access to the Zenypass account.
  * * a {ZenypassService} instance
  * when this agent is authorized access to the Zenypass account.
@@ -70,7 +70,7 @@ export interface ZenypassServiceFactoryRequest {
  */
 export interface ZenypassServiceFactory {
   (creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
-  Promise<LocalAgentManagementService|ZenypassService>
+  Promise<AuthenticationService|ZenypassService>
 }
 
 export interface ZenypassServiceOpts {
@@ -119,7 +119,8 @@ export interface ZenypassService {
    *
    * @memberOf ZenypassService
    */
-  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassServiceFactoryRequest>
+  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassAccountRequest>
+
   /**
    * @public
    * @method
@@ -168,7 +169,7 @@ export interface ZenypassService {
    * @type {Observable<(RemoteAgentManagementService)[]>}
    * @memberOf ZenypassService
    */
-  agent$: Observable<(RemoteAgentManagementService)[]>
+  agent$: Observable<(RevocationService)[]>
 
   /**
    * @public
@@ -181,7 +182,7 @@ export interface ZenypassService {
    *
    * @type {Observable<boolean>}
    *
-   * @memberOf ZenypassServiceState
+   * @memberOf ZenypassService
    */
   online$: Observable<boolean>
 }
@@ -197,7 +198,7 @@ export interface ZenypassService {
  * i.e. before authorization or after revocation
  * by a remote authorized agent.
  */
-export interface LocalAgentManagementService extends AgentIdentifier {
+export interface AuthenticationService extends AgentIdentifier {
   /**
    * @public
    * @method
@@ -215,7 +216,7 @@ export interface LocalAgentManagementService extends AgentIdentifier {
    *
    * @error {Error} 'authentication failure'
    *
-   * @memberOf LocalAgentManagementService
+   * @memberOf AuthenticationService
    */
   authenticate (authToken: string): Promise<ZenypassServiceFactory>
 
@@ -232,13 +233,13 @@ export interface LocalAgentManagementService extends AgentIdentifier {
    * i.e. deleting the last agent the user can access,
    * with the remaining agents not accessible to their user.
    *
-   * @returns {Promise<ZenypassServiceFactory>}
+   * @returns {Promise<void>}
    *
    * @error {Error} 'service unavailable'
    *
-   * @memberOf LocalAgentManagementService
+   * @memberOf AuthenticationService
    */
-  delete (): Promise<ZenypassServiceFactory>
+  delete (): Promise<void>
 }
 
 /**
@@ -252,7 +253,7 @@ export interface LocalAgentManagementService extends AgentIdentifier {
  *
  * @extends {AgentIdentifier}
  */
-export interface RemoteAgentManagementService extends AgentIdentifier {
+export interface RevocationService extends AgentIdentifier {
   /**
    * @public
    * @method
@@ -261,17 +262,17 @@ export interface RemoteAgentManagementService extends AgentIdentifier {
    * revoke access to this account for this Agent.
    *
    * calling this method enables deleting the corresponding agent
-   * when next [signing-in to it]{@link LocalAgentManagementService#delete}.
+   * when next [signing-in to it]{@link AuthenticationService#delete}.
    *
    * @param {ZenypassCredentials} creds
    * necessary security, as it ensures
    * the account owner is issuing the revocation request.
    *
-   * @returns {(Promise<(RemoteAgentManagementService)[]>)}
+   * @returns {Promise<RevocationService[]}
    *
-   * @memberOf AgentRevocationService
+   * @memberOf RevocationService
    */
-  revoke (creds: ZenypassCredentials): Promise<(RemoteAgentManagementService)[]>
+  revoke (creds: ZenypassCredentials): Promise<RevocationService[]>
 }
 
 export interface AgentIdentifier {
@@ -288,7 +289,7 @@ export interface AgentIdentifier {
    *
    * @see ZenypassServiceOpts#id
    *
-   * @memberOf RemoteAgentManagementService
+   * @memberOf AgentIdentifier
    */
   id: string
 }
@@ -300,11 +301,11 @@ class ServiceClass implements ZenypassService {
   }
 
   static signin (this: void, creds: ZenypassCredentials, opts?: ZenypassServiceOpts):
-  Promise<LocalAgentManagementService|ZenypassService> {
+  Promise<AuthenticationService|ZenypassService> {
     return
   }
 
-  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassServiceFactoryRequest> {
+  deleteAccount (creds: ZenypassCredentials): Promise<ZenypassAccountRequest> {
     return
   }
 
@@ -318,10 +319,10 @@ class ServiceClass implements ZenypassService {
 
   constructor (
     public vault: ZenypassVaultService,
-    public agent$: Observable<(RemoteAgentManagementService)[]>,
+    public agent$: Observable<(RevocationService)[]>,
     public online$: Observable<boolean>
   ) {}
 }
 
-export const signup: ZenypassServiceFactoryRequest = ServiceClass.signup
+export const signup: ZenypassAccountRequest = ServiceClass.signup
 export const signin: ZenypassServiceFactory = ServiceClass.signin
