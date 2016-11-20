@@ -139,18 +139,16 @@ export interface ZenypassService {
    * @public
    * @method
    *
-   * @param {Observable<ZenypassCredentials>} cred$
+   * @param {ZenypassCredentials} cred
    * necessary security, as it ensures
    * the account owner is requesting an authentication token.
    *
-   * @returns {Observable<string>}
-   * emits a new authentication token
-   * whenever the input `cred$` emits a valid {ZenypassCredentials} instance.
-   * the token is valid 15min.
+   * @returns {string}
+   * new authentication token valid 15min.
    *
    * @memberOf ZenypassService
    */
-  getAuthTokenStream (cred$: Observable<ZenypassCredentials>): Observable<string>
+  newAuthToken (cred: ZenypassCredentials): string
 
   /**
    * @public
@@ -313,7 +311,7 @@ class ServiceClass implements ZenypassService {
     return
   }
 
-  getAuthTokenStream (cred$: Observable<ZenypassCredentials>): Observable<string> {
+  newAuthToken (cred: ZenypassCredentials): string {
     return
   }
 
