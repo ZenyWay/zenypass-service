@@ -16,10 +16,10 @@ import { OpgpService, OpgpProxyKey } from 'opgp-service'
 import {
   VersionedDoc, DocId, DocRef, DocRevs, DocIdRange, RevStatusDoc, ReadOpts
 } from 'cbox-vault'
-import { AccountFactory, Account } from '../account'
+import { AccountFactory, Account, AccountDoc } from '../account'
 export interface Observable<T> {} // TODO: replace with import
 
-export { AccountFactory }
+export { AccountFactory, Account, AccountDoc }
 
 export interface ZenypassVaultServiceFactory {
   (config: ZenypassVaultServiceConfig): Promise<ZenypassVaultServiceFactory>
@@ -67,6 +67,7 @@ export interface ZenypassVaultServiceConfig {
 }
 
 export interface ZenypassVaultService {
+  newAccount: AccountFactory
   /**
    * @public
    * @method
