@@ -13,7 +13,7 @@
  */
 ;
 // TODO interface for changing master password
-import { ZenypassVaultService, ZenypassCredentials } from './vault-service'
+import { ZenypassVaultService, ZenypassCredentials } from './lib/vault-service'
 export declare interface Observable<T> {} // TODO: replace with import
 
 /**

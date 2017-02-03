@@ -28,12 +28,14 @@
     "url": "git+https://github.com/zenyway/zenypass-service.git"
   },
   "keywords": [
-    "cache",
-    "lru-cache",
-    "csrng",
+    "vault",
+    "safe",
+    "password",
+    "password manager",
     "crypto",
     "webcrypto",
-    "node"
+    "zero-knowledge",
+    "sync"
   ],
   "author": {
     "name": "Stephane M. Catala",
@@ -45,38 +47,43 @@
   },
   "homepage": "https://github.com/zenyway/zenypass-service#readme",
   "dependencies": {
-    "debug": "2.3.2",
-    "tslib": "^1.0.0"
+    "cbox-vault": "^1.0.0",
+    "debug": "2.6.0",
+    "opgp-service": "^2.1.0",
+    "pbkdf2": "^3.0.9",
+    "pouchdb-browser": "^6.1.1",
+    "randombytes": "^2.0.3",
+    "tslib": "^1.5.0"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.5.37",
-    "@types/node": "^6.0.46",
+    "@types/jasmine": "^2.5.41",
+    "@types/node": "^7.0.4",
     "brfs": "^1.4.3",
-    "browserify": "^13.1.1",
+    "browserify": "^14.0.0",
     "browserify-istanbul": "^2.0.0",
     "concurrently": "^3.1.0",
-    "coveralls": "^2.11.14",
+    "coveralls": "^2.11.15",
     "cpx": "^1.5.0",
-    "eslint": "^3.9.1",
+    "eslint": "^3.14.1",
     "http-server": "^0.9.0",
     "istanbul": "^0.4.5",
     "jasmine-core": "^2.5.2",
-    "karma": "^1.3.0",
-    "karma-browserify": "^5.1.0",
+    "karma": "^1.4.1",
+    "karma-browserify": "^5.1.1",
     "karma-chrome-launcher": "^2.0.0",
     "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "^1.0.0",
-    "karma-jasmine": "^1.0.2",
+    "karma-jasmine": "^1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "karma-junit-reporter": "^1.1.0",
+    "karma-junit-reporter": "^1.2.0",
     "karma-safari-launcher": "^1.0.0",
     "karma-spec-reporter": "0.0.26",
     "mkdirp": "^0.5.1",
-    "remap-istanbul": "^0.7.0",
+    "remap-istanbul": "^0.8.4",
     "rimraf": "^2.5.4",
-    "tsify": "^2.0.2",
-    "typescript": "^2.0.8",
+    "tsify": "^3.0.1",
+    "typescript": "^2.1.5",
     "uglifyify": "^3.0.4",
-    "watchify": "^3.7.0"
+    "watchify": "^3.9.0"
   }
 }
