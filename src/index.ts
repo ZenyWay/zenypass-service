@@ -208,7 +208,7 @@ export interface AuthenticationService extends AgentIdentifier {
    * @param {string} authToken
    * valid authentication token from an authorized agent.
    *
-   * @returns {Promise<ZenypassServiceFactory>}
+   * @returns {Promise<ZenypassService>}
    *
    * @error {Error} 'service unavailable'
    *
@@ -216,7 +216,7 @@ export interface AuthenticationService extends AgentIdentifier {
    *
    * @memberOf AuthenticationService
    */
-  authenticate (authToken: string): Promise<ZenypassServiceFactory>
+  authenticate (authToken: string): Promise<ZenypassService>
 
   /**
    * @public
