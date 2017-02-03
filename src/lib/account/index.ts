@@ -61,12 +61,15 @@ export interface Account extends VersionedDoc {
    * with updated entries from the given `props` object.
    *
    * @error {Error} 'invalid passphrase'
-   * when `props` includes updated `password` or `restricted` entries,
-   * and `restricted` is true, and `passphrase` is invalid.
+   * when the `passphrase` is invalid
+   * and `props` includes updated `password`, `_deleted: true`
+   * or `restricted: false` entries,
+   * while `restricted` is true.
    */
   set (props: Partial<AccountDoc>, passphrase?: string): Promise<Account>
   readonly _id: string
   readonly _rev: string
+  readonly _deleted?: boolean
   readonly name: string
   readonly url: string
   readonly username: string
