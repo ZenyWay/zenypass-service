@@ -16,7 +16,10 @@ import { OpgpService, OpgpProxyKey } from 'opgp-service'
 import {
   VersionedDoc, DocId, DocRef, DocRevs, DocIdRange, RevStatusDoc, ReadOpts
 } from 'cbox-vault'
+import { AccountFactory, Account } from '../account'
 export interface Observable<T> {} // TODO: replace with import
+
+export { AccountFactory }
 
 export interface ZenypassVaultServiceFactory {
   (config: ZenypassVaultServiceConfig): Promise<ZenypassVaultServiceFactory>
@@ -89,7 +92,7 @@ export interface ZenypassVaultService {
    *
    * @memberOf ZenypassVaultService
    */
-  write (doc$: Observable<AccountDoc[]|AccountDoc>): Observable<DocRef[]|DocRef>
+  write (doc$: Observable<Account[]|Account>): Observable<DocRef[]|DocRef>
 
   /**
    * @public
@@ -131,84 +134,10 @@ export interface ZenypassVaultService {
    * @memberOf ZenypassVaultService
    */
   read (ref$: Observable<DocRef[]|DocIdRange|DocRevs|DocRef>, opts?: ReadOpts):
-  Observable<AccountDoc[]|AccountDoc|(AccountDoc&RevStatusDoc)>
-
-  /**
-   * @deprecated
-   * @public
-   * @method
-   *
-   * @description
-   * rx operator that maps a sequence of document references
-   * including credentials
-   * to the `restricted` entry of the corresponding documents fetched from
-   * the underlying (cryptobox)[https://www.npmjs.com/package/cryptobox] instance.
-   * each document fetched requires valid credentials.
-   *
-   * @template R extends DocRef|(DocRef&ZenypassCredentials)
-   * a single reference, specified as a {DocRef}
-   * including valid {ZenypassCredentials},
-   * unless the `strict` entry of the fetched {ZenypassDoc}
-   * is explicitely set to `false`.
-   *
-   * @template D extends VersionedDoc
-   *
-   * @param {Observable<R>} ref$
-   * a sequence-like set of document references.
-   *
-   * @return {Observable<D[]|D>}
-   * the `restricted` entry of the {VersionedDoc} document
-   * retrieved from the underlying
-   * (cryptobox)[https://www.npmjs.com/package/cryptobox] instance.
-   *
-   * @error {Error} when retrieving a document fails
-   * // TODO provide more detail on possible fetch errors
-   *
-   * @memberOf ZenypassVaultService
-   */
-  readRestricted <R extends DocRef|(DocRef&ZenypassCredentials), D extends VersionedDoc>
-  (ref$: Observable<R>): Observable<D[]|D>
+  Observable<Account[]|Account|(Account&RevStatusDoc)>
 }
 
 export interface ZenypassCredentials {
   username: string
   passphrase: string
 }
-
-export interface AccountDoc extends VersionedDoc {
-  name: string
-  url: string
-  username: string
-  /**
-   * get or set the password for this account.
-   * * when called without a value string,
-   * returns the value of the current password.
-   * * when called with a value string,
-   * sets the password to the given value,
-   * and returns the updated value.
-   * * when the `restricted` property is `true`,
-   * a correct `passphrase` argument is mandatory
-   * to set the password value.
-   * if the `passphrase` is incorrect,
-   * returns the value of the current password.
-   */
-  password (value?: string): string
-  password (passphrase: string, value?: string): string
-  keywords: string[]
-  /**
-   * automatic login
-   * default: false
-   */
-  login: boolean
-  /**
-   * enables password-protected access to the `password` property.
-   * * when called without arguments or with an incorrect `passphrase`,
-   * returns the state of this property.
-   * * when called with the correct `passphrase`,
-   * toggles the state of this property and returns its new value.
-   *
-   * default: true
-   */
-  restricted (passphrase?: string): boolean
-}
-
