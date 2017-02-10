@@ -30,18 +30,34 @@ export interface AccountFactorySpec {
  * for a new [AccountDoc]{@link AccountDoc}.
  * the `_rev` property of the returned [Account]{@link Account} instance
  * is forced to `undefined`.
+ * when called with an incomplete `AccountDoc`,
+ * if AccountSpec#defaults is `true`,
+ * returns a new `Account` instance with default values
+ * for missing properties where appropriate.
+ * it is possible to override these defaults
+ * with `Account#set` on the returned instance.
  */
 export interface AccountFactory {
-  (doc: AccountDoc): Account
+  (doc?: AccountDoc, opts?: AccountSpec): Account
 }
 
-export interface AccountDoc extends DocId { // no _rev property
-  name: string
+export interface AccountSpec {
+  /**
+   * set default values for missing optional properties
+   * of the given `AccountDoc`.
+   *
+   * default: true
+   */
+  defaults: boolean
+}
+
+export interface AccountDoc { // no _id or _rev properties
+  name?: string
   url: string
   username: string
   password: string
-  keywords: string[]
-  comments: string
+  keywords?: string[]
+  comments?: string
   /**
    * automatic login
    * default: false
@@ -68,7 +84,7 @@ export interface Account extends VersionedDoc {
    */
   set (props: Partial<AccountDoc>, passphrase?: string): Promise<Account>
   readonly _id: string
-  readonly _rev: string
+  readonly _rev?: string
   readonly _deleted?: boolean
   readonly name: string
   readonly url: string
@@ -81,7 +97,7 @@ export interface Account extends VersionedDoc {
    */
   password (passphrase?: string): Promise<string>
   readonly keywords: string[]
-  readonly comments: string
+  readonly comments?: string
   readonly login: boolean
   readonly restricted: boolean
 }
